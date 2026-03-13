@@ -12,6 +12,7 @@
           <th>Name</th>
           <th>Price</th>
           <th>Color</th>
+          <th>Category</th>
           <th>Description</th>
           <th style="width:140px">Actions</th>
         </tr>
@@ -25,6 +26,7 @@
             <td><%= p.name %></td>
             <td><%= p.price %></td>
             <td><%= p.color %></td>
+            <td><%= p.category || '' %></td>
             <td><%= p.description || '' %></td>
             <td>
               <button class="btn btn-sm btn-outline-secondary btn-edit">Edit</button>
@@ -59,6 +61,19 @@
               <label class="form-label">Color</label>
               <input id="color" name="color" type="text" class="form-control" required>
             </div>
+            <div class="mb-3">
+              <label class="form-label">Category</label>
+              <select id="category" name="category" class="form-select">
+                <option value="phone-tablet">Phone, Tablet</option>
+                <option value="laptop">Laptop</option>
+                <option value="audio-mic">Audio, Microphone</option>
+                <option value="watch-camera">Watch, Camera</option>
+                <option value="home-beauty">Home Appliances, Beauty</option>
+                <option value="accessories">Accessories</option>
+                <option value="pc-monitor-printer">PC, Monitor, Printer</option>
+                <option value="tv-electronics">TV, Electronics</option>
+                </select>
+                
             <div class="mb-3">
               <label class="form-label">Description</label>
               <textarea id="description" name="description" class="form-control" rows="2"></textarea>

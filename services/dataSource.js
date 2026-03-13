@@ -13,6 +13,7 @@ function createAppleProducts() {
       name: 'iPhone 14 Pro Max',
       price: 1099,
       color: 'space-black',
+      category: 'phone-tablet',
       description: '6.7‑inch Super Retina XDR display, A16 Bionic chip, pro camera system.',
       imageUrl: ''
     },
@@ -20,6 +21,7 @@ function createAppleProducts() {
       name: 'iPhone SE (3rd generation)',
       price: 429,
       color: 'black',
+      category: 'phone-tablet',
       description: 'Compact design with A15 Bionic, great value for everyday use.',
       imageUrl: ''
     },
@@ -27,48 +29,56 @@ function createAppleProducts() {
       name: 'MacBook Pro 14-inch (M2 Pro)',
       price: 1999,
       color: 'silver',
+      category: 'laptop',
       description: 'Powerful M2 Pro chip, Liquid Retina XDR display, up to 18‑hour battery life.'
     },
     {
       name: 'MacBook Air 13-inch (M2)',
       price: 1199,
       color: 'midnight',
+      category: 'laptop',
       description: 'Thin and light with M2 chip, silent fanless design and great battery life.'
     },
     {
       name: 'iPad Pro 11-inch (M4)',
       price: 799,
       color: 'silver',
+      category: 'phone-tablet',
       description: 'M4 chip, Liquid Retina display with ProMotion, powerful for creative work.'
     },
     {
       name: 'Apple Watch Series 9',
       price: 399,
       color: 'starlight',
+      category: 'watch-camera',
       description: 'Faster S9 chip, more accurate sensors, and brighter display.'
     },
     {
       name: 'AirPods Pro (2nd generation)',
       price: 249,
       color: 'white',
+      category: 'audio-mic',
       description: 'Active Noise Cancellation, improved audio quality and longer battery.'
     },
     {
       name: 'HomePod (2nd generation)',
       price: 299,
       color: 'white',
+      category: 'audio-mic',
       description: 'High-fidelity audio with computational audio and Siri smart home control.'
     },
     {
       name: 'iPhone 13',
       price: 699,
       color: 'blue',
+      category: 'phone-tablet',
       description: 'A great all-rounder with excellent battery life and dual-camera system.'
     },
     {
       name: 'iPad (10th generation)',
       price: 449,
       color: 'pink',
+      category: 'phone-tablet',
       description: 'Updated design, larger display, and capable for school and home use.',
       imageUrl: ''
     }
@@ -88,7 +98,7 @@ async function init(useMongo) {
       const count = await ProductModel.countDocuments();
       if (count === 0) {
         // seed mongodb with items mapped to schema (exclude in-memory id)
-        const docs = inMemory.map(({ name, price, color, description, imageUrl }) => ({ name, price, color, description, imageUrl }));
+        const docs = inMemory.map(({ name, price, color, description, imageUrl, category }) => ({ name, price, color, description, imageUrl, category }));
         await ProductModel.insertMany(docs);
       }
     } catch (err) {

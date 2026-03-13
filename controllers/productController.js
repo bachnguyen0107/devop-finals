@@ -23,7 +23,7 @@ async function getOne(req, res, next) {
 async function create(req, res, next) {
   try {
     const file = req.file;
-    const payload = (({ name, price, color, description }) => ({ name, price, color, description }))(req.body);
+    const payload = (({ name, price, color, description, category }) => ({ name, price, color, description, category }))(req.body);
     if (file) payload.imageUrl = `/uploads/${file.filename}`;
     const item = await dataSource.create(payload);
     res.status(201).json({ data: item, ...meta() });
@@ -33,7 +33,7 @@ async function create(req, res, next) {
 async function put(req, res, next) {
   try {
     const file = req.file;
-    const payload = (({ name, price, color, description }) => ({ name, price, color, description }))(req.body);
+    const payload = (({ name, price, color, description, category }) => ({ name, price, color, description, category }))(req.body);
     if (file) payload.imageUrl = `/uploads/${file.filename}`;
     const item = await dataSource.replace(req.params.id, payload);
     if (!item) return res.status(404).json({ message: 'Not found', ...meta() });
@@ -45,7 +45,9 @@ async function patch(req, res, next) {
   try {
     const file = req.file;
     const payload = {};
-    ['name','price','color','description'].forEach(k => { if (k in req.body) payload[k] = req.body[k]; });
+    ['name','price','color','description','category'].forEach(k => {
+      if (k in req.body) payload[k] = req.body[k];
+    });
     if (file) payload.imageUrl = `/uploads/${file.filename}`;
     const item = await dataSource.patch(req.params.id, payload);
     if (!item) return res.status(404).json({ message: 'Not found', ...meta() });

@@ -5,29 +5,49 @@ document.addEventListener('DOMContentLoaded', function () {
   const modal = new bootstrap.Modal(modalEl);
 
   function openModalForAdd() {
-    document.getElementById('modalTitle').textContent = 'Add Product';
-    productForm.reset();
-    document.getElementById('product-id').value = '';
-    document.getElementById('img-preview').src = '/images/placeholder-80.png';
-    document.getElementById('imageUrl').value = '';
-    modal.show();
+  document.getElementById('modalTitle').textContent = 'Add Product';
+  productForm.reset();
+  document.getElementById('product-id').value = '';
+  document.getElementById('img-preview').src = '/images/placeholder-80.png';
+  document.getElementById('imageUrl').value = '';
+
+  const categorySelect = document.getElementById('category');
+  if (categorySelect) {
+    categorySelect.selectedIndex = 0; 
   }
 
+  modal.show();
+}
+
   function openModalForEdit(row) {
-    document.getElementById('modalTitle').textContent = 'Edit Product';
-    const id = row.dataset.id;
-    document.getElementById('product-id').value = id;
-    const cols = row.querySelectorAll('td');
-    // columns: 0=thumb,1=name,2=price,3=color,4=description
-    document.getElementById('name').value = cols[1].textContent.trim();
-    document.getElementById('price').value = cols[2].textContent.trim();
-    document.getElementById('color').value = cols[3].textContent.trim();
-    document.getElementById('description').value = cols[4].textContent.trim();
-    const existingImage = row.dataset.image || '';
-    document.getElementById('img-preview').src = existingImage && existingImage.length ? existingImage : '/images/placeholder-80.png';
-    document.getElementById('imageUrl').value = existingImage || '';
-    modal.show();
+  document.getElementById('modalTitle').textContent = 'Edit Product';
+  const id = row.dataset.id;
+  document.getElementById('product-id').value = id;
+  const cols = row.querySelectorAll('td');
+  // columns: 0=thumb,1=name,2=price,3=color,4=category,5=description
+  document.getElementById('name').value = cols[1].textContent.trim();
+  document.getElementById('price').value = cols[2].textContent.trim();
+  document.getElementById('color').value = cols[3].textContent.trim();
+
+  // NEW: set category select from the category cell text
+  const categoryText = cols[4].textContent.trim();
+  const categorySelect = document.getElementById('category');
+  // map display text back to option value 
+  for (const opt of categorySelect.options) {
+    if (opt.text.trim() === categoryText) {
+      categorySelect.value = opt.value;
+      break;
+    }
   }
+
+  document.getElementById('description').value = cols[5].textContent.trim();
+
+  const existingImage = row.dataset.image || '';
+  document.getElementById('img-preview').src =
+    existingImage && existingImage.length ? existingImage : '/images/placeholder-80.png';
+  document.getElementById('imageUrl').value = existingImage || '';
+  modal.show();
+}
 
   btnAdd.addEventListener('click', openModalForAdd);
 
@@ -62,6 +82,8 @@ document.addEventListener('DOMContentLoaded', function () {
     formData.append('name', name);
     formData.append('price', price);
     formData.append('color', color);
+    formData.append('category', document.getElementById('category').value);
+
     formData.append('description', document.getElementById('description').value.trim());
     const file = document.getElementById('imageFile').files[0];
     if (file) formData.append('imageFile', file);
