@@ -289,6 +289,167 @@ See: **Section 5.3 instructions** for process management configuration.
 
 ---
 
+## Section 5.3 & 5.4: Process Management & Reverse Proxy with HTTPS
+
+### Overview
+The application is now managed by PM2 with automatic restart capabilities and runs behind Nginx reverse proxy with Let's Encrypt SSL/TLS encryption.
+
+### 5.3 Process Management (PM2)
+
+**Installation**
+```bash
+# On server
+sudo npm install -g pm2
+pm2 start /home/ubuntu/product-api/main.js --name "product-api"
+pm2 save
+pm2 startup
+```
+
+**Verification**
+```bash
+pm2 list          # Shows app running
+pm2 logs          # Shows application logs
+pm2 restart all   # Restart if needed
+```
+
+### 5.4 Reverse Proxy & HTTPS (Nginx + Let's Encrypt)
+
+**Domain Setup**
+- Domain: `devop-midterm2026.online`
+- Registrar: Hostinger
+- DNS A Record: Points to `54.234.158.141` (Elastic IP)
+- SSL Certificate: Let's Encrypt (free, auto-renewable)
+
+**Nginx Installation & Configuration**
+```bash
+# On server
+sudo apt update
+sudo apt install -y nginx certbot python3-certbot-nginx
+
+# Create Nginx config
+sudo nano /etc/nginx/sites-available/product-api
+# [Paste configuration from docs/configs/nginx-product-api.conf]
+
+# Enable site
+sudo ln -s /etc/nginx/sites-available/product-api /etc/nginx/sites-enabled/
+sudo rm /etc/nginx/sites-enabled/default  # Remove default site if present
+
+# Test configuration
+sudo nginx -t
+```
+
+**Nginx Configuration (See: docs/configs/nginx-product-api.conf)**
+
+The Nginx configuration:
+- Listens on port 80 (HTTP) and port 443 (HTTPS)
+- Forwards all traffic to Node.js app on port 3000
+- Redirects HTTP → HTTPS automatically
+- Uses Let's Encrypt SSL certificates (managed by Certbot)
+- Logs requests to `/var/log/nginx/product-api-*.log`
+
+**Let's Encrypt Certificate Installation**
+```bash
+# On server
+sudo certbot --nginx -d devop-midterm2026.online
+
+# Interactive prompts:
+# - Enter email address
+# - Agree to terms (Y)
+# - Share information with EFF (Y recommended)
+# - Choose redirect option when prompted (Option 2: redirect all HTTP to HTTPS)
+```
+
+**Certificate Details**
+- Issuer: Let's Encrypt
+- Domain: devop-midterm2026.online
+- Certificate path: `/etc/letsencrypt/live/devop-midterm2026.online/fullchain.pem`
+- Private key path: `/etc/letsencrypt/live/devop-midterm2026.online/privkey.pem`
+- Validity: 90 days (auto-renewal enabled)
+
+**Verification**
+```bash
+# Check certificate
+sudo certbot certificates
+
+# View certificate details
+sudo openssl x509 -in /etc/letsencrypt/live/devop-midterm2026.online/fullchain.pem -text -noout
+
+# Check auto-renewal status
+sudo systemctl status certbot.timer
+
+# Verify certificate auto-renewal works
+sudo certbot renew --dry-run
+
+# Test from local machine
+curl https://devop-midterm2026.online/products
+# or
+curl http://devop-midterm2026.online  # Will redirect to HTTPS
+```
+
+**Nginx Management**
+```bash
+# Start/stop/restart
+sudo systemctl start nginx
+sudo systemctl stop nginx
+sudo systemctl restart nginx
+
+# Enable auto-start on reboot
+sudo systemctl enable nginx
+
+# Monitor static files
+ls -la /var/log/nginx/product-api-*.log
+sudo tail -f /var/log/nginx/product-api-access.log  # Real-time monitoring
+```
+
+**Complete Architecture**
+```
+Internet Traffic (HTTPS)
+         ↓
+    Port 443 (SSL)
+         ↓
+    Nginx Reverse Proxy
+    (devop-midterm2026.online)
+         ↓
+    Port 3000 (Internal)
+         ↓
+  Express.js Application
+```
+
+**Security Features**
+- ✅ HTTPS encryption (TLS 1.2+)
+- ✅ Valid certificate (Let's Encrypt, not self-signed)
+- ✅ HTTP → HTTPS redirect
+- ✅ Certificate auto-renewal (90-day validity)
+- ✅ Port 443 only accessible from public internet (not port 3000)
+- ✅ Security group restricts ports 22, 80, 443
+
+### Testing the Complete Setup
+```bash
+# From local machine, verify all functionality:
+
+# 1. HTTP redirects to HTTPS
+curl -I http://devop-midterm2026.online
+# Expected: HTTP/1.1 301 (redirect to https://)
+
+# 2. HTTPS works with valid certificate
+curl https://devop-midterm2026.online/
+# Expected: HTML response, no certificate warnings
+
+# 3. API endpoint accessible
+curl https://devop-midterm2026.online/products
+# Expected: JSON array of products
+
+# 4. Certificate chain valid
+curl --cacert /etc/ssl/certs/ca-certificates.crt https://devop-midterm2026.online/
+# Expected: Success (no warnings)
+
+# 5. Browser access
+# Navigate to: https://devop-midterm2026.online
+# Expected: Green lock icon, no warnings
+```
+
+---
+
 ## Troubleshooting
 
 ### Application won't start
@@ -326,12 +487,84 @@ ls -la
 sudo chown -R ubuntu:ubuntu ~/product-api
 ```
 
+### Nginx configuration issues
+```bash
+# Test Nginx configuration syntax
+sudo nginx -t
+
+# Reload Nginx after configuration changes
+sudo systemctl reload nginx
+
+# Check Nginx error logs
+sudo tail -50 /var/log/nginx/error.log
+
+# Monitor Nginx access logs
+sudo tail -f /var/log/nginx/product-api-access.log
+
+# Verify Nginx is listening on ports
+sudo netstat -tlnp | grep nginx
+# or
+sudo ss -tlnp | grep nginx
+
+# Check if port 80/443 are accessible
+curl http://localhost:3000            # Direct app
+curl http://127.0.0.1                 # Through Nginx (port 80)
+sudo netstat -tlnp | grep :80
+sudo netstat -tlnp | grep :443
+```
+
+### HTTPS/SSL Certificate issues
+```bash
+# Check certificate expiration
+sudo certbot certificates
+
+# View full certificate details
+sudo openssl x509 -in /etc/letsencrypt/live/devop-midterm2026.online/fullchain.pem -text
+
+# Verify certificate is valid for domain
+sudo openssl x509 -in /etc/letsencrypt/live/devop-midterm2026.online/fullchain.pem -noout -subject
+
+# Check certificate and key match
+sudo openssl x509 -noout -modulus -in /etc/letsencrypt/live/devop-midterm2026.online/fullchain.pem | openssl md5
+sudo openssl rsa -noout -modulus -in /etc/letsencrypt/live/devop-midterm2026.online/privkey.pem | openssl md5
+# Both should produce same hash
+
+# Manual certificate renewal
+sudo certbot renew --force-renewal -d devop-midterm2026.online
+
+# Check auto-renewal logs
+sudo journalctl -u certbot.timer
+sudo systemctl status certbot.timer
+
+# Certbot renewal dry-run
+sudo certbot renew --dry-run
+```
+
+### Domain/DNS issues
+```bash
+# Verify DNS A record resolves to Elastic IP
+nslookup devop-midterm2026.online
+dig devop-midterm2026.online
+
+# Verify Elastic IP is correct
+# Expected: 54.234.158.141
+
+# Test SSL certificate for domain
+openssl s_client -connect devop-midterm2026.online:443 -servername devop-midterm2026.online
+
+# Check if domain is resolving on server
+ssh ubuntu@54.234.158.141
+dig devop-midterm2026.online
+```
+
 ---
 
 ## References
 - Node.js Deployment: https://nodejs.org/en/docs/guides/
 - npm Documentation: https://docs.npmjs.com/
 - Express.js: https://expressjs.com/
+- Nginx Documentation: https://nginx.org/en/docs/
+- Let's Encrypt / Certbot: https://certbot.eff.org/
 - Application README: [../README.md](../README.md)
 - Architecture: [ARCHITECTURE.md](ARCHITECTURE.md)
 - Security: [SECURITY.md](SECURITY.md)

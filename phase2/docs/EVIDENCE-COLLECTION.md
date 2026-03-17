@@ -202,39 +202,52 @@ sudo tail -20 /var/log/nginx/product-api-access.log
 
 ---
 
-### 6. HTTPS Configuration (Section 5.5 - Optional)
+### 6. HTTPS Configuration with Let's Encrypt (Section 5.5 - Domain & SSL)
 
 **What to Capture:**
-- [ ] Self-signed certificate created
-- [ ] Nginx HTTPS configuration
-- [ ] HTTPS connection working (curl -k)
+- [ ] Let's Encrypt certificate installed for domain
+- [ ] Domain name configured in Nginx
+- [ ] HTTPS connection working with valid certificate
 - [ ] HTTP redirects to HTTPS
+- [ ] Certificate auto-renewal configured
 
 **How to Capture:**
 ```bash
 # On server:
 
-# 1. Certificate files exist
-sudo ls -la /etc/ssl/certs/self-signed.crt
-sudo ls -la /etc/ssl/private/self-signed.key
+# 1. Certificate files exist (Let's Encrypt)
+sudo ls -la /etc/letsencrypt/live/devop-midterm2026.online/
 
 # 2. Certificate details
-sudo openssl x509 -in /etc/ssl/certs/self-signed.crt -text -noout | head -20
+sudo openssl x509 -in /etc/letsencrypt/live/devop-midterm2026.online/fullchain.pem -text -noout | head -30
 
-# 3. Nginx HTTPS config
-sudo grep -A 20 "listen 443" /etc/nginx/sites-available/product-api
+# 3. Certbot certificates list
+sudo certbot certificates
 
-# 4. From LOCAL machine:
-curl -k https://54.234.158.141  # HTTPS works (ignore cert warning)
-curl http://54.234.158.141      # HTTP redirects to HTTPS
+# 4. Nginx domain configuration
+sudo cat /etc/nginx/sites-available/product-api
+
+# 5. Nginx configuration test
+sudo nginx -t
+
+# 6. From LOCAL machine:
+curl -v https://devop-midterm2026.online/products  # HTTPS works with valid cert
+curl http://devop-midterm2026.online                 # HTTP redirects to HTTPS (follow 301)
+
+# 7. Check auto-renewal status
+sudo systemctl status certbot.timer
+sudo certbot renew --dry-run
 ```
 
 **Evidence File Names:**
-- `ssl-certificate-created.png`
-- `ssl-certificate-details.txt`
-- `nginx-https-config.txt`
-- `https-working.png`
-- `http-redirect-https.png`
+- `letsencrypt-certificate-files.png` (ls output of cert directory)
+- `ssl-certificate-details.txt` (openssl output)
+- `certbot-certificates-list.png` (sudo certbot certificates)
+- `nginx-config-with-domain.txt` (full config)
+- `nginx-test-successful.png`
+- `https-with-domain-working.png` (curl -v output)
+- `http-redirect-https.png` (curl output showing 301 redirect)
+- `certbot-auto-renewal-status.png` (systemctl status certbot.timer)
 
 ---
 
