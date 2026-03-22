@@ -48,4 +48,5 @@ junit.xml
 # Miscellaneous
 .env.example.kept
 secrets/
-private/
+private/labsuser.pem
+public_key.txt
