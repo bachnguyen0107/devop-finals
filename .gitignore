@@ -50,3 +50,12 @@ junit.xml
 secrets/
 private/labsuser.pem
 public_key.txt
+
+# Docker volumes and runtime data
+mongo_data/
+uploads_data/
+logs_data/
+ssl/
+letsencrypt/
+certbot/
+.env
