@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'node_app'
+    # We could scrape metrics from the node app if it exposes /metrics,
+    # or we can scrape cadvisor. For now, since we don't have cadvisor
+    # or a metrics endpoint in the app, let's add cadvisor to docker-compose.
+    # We will configure it to point to cadvisor to monitor containers.
+    static_configs:
+      - targets: ['cadvisor:8080']
