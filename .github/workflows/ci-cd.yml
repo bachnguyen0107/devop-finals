@@ -93,8 +93,11 @@ jobs:
             cd devop-finals
             git pull origin main || true
             
-            # Dọn dẹp docker để giải phóng dung lượng disk
+            # Dọn dẹp docker sạch sẽ để giải phóng dung lượng disk tối đa
             docker system prune -af --volumes || true
+            docker rmi $(docker images -q) 2>/dev/null || true
+            docker volume prune -f || true
+            df -h
             
             # Tạo file .env từ template và trỏ về mongo container
             cp .env.example .env
