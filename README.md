@@ -210,6 +210,46 @@ The stack includes:
 
 ---
 
+## Deployment Strategy
+
+### Production Deployment (EC2 - Optimized for t2.micro)
+Uses **lean config** to fit disk constraints:
+```bash
+docker-compose -f docker-compose.prod.yml up -d --build
+```
+Services: nginx, web (3 replicas), mongo
+- Fits in 2.1GB available disk space
+- Essential services only for core functionality
+- Deployed via GitHub Actions on git push to main
+
+### Full Stack Deployment (Development/Demo)
+Uses **full config** with monitoring stack:
+```bash
+docker-compose up -d --build
+```
+Services: nginx, web (3 replicas), mongo, prometheus, grafana, cadvisor
+- Requires ~4GB disk space
+- Complete monitoring and observability
+- Used for local testing and live demonstrations
+
+### Monitoring Stack (Optional - Can be added separately)
+```bash
+docker-compose -f docker-compose.monitoring.yml up -d
+```
+Services: prometheus, grafana, cadvisor
+- Connects to existing app-network
+- Grafana admin: admin/admin (port 3001)
+- Prometheus: port 9090
+- cAdvisor: port 8080
+
+**Demo Strategy:**
+1. Show production deployment on EC2 (via SSH or browser)
+2. For monitoring demonstration: Start monitoring stack locally or on secondary host
+3. Show end-to-end CI/CD: code change → GitHub Actions → production update
+4. Demonstrate failure recovery and monitoring insights
+
+---
+
 ## Troubleshooting
 
 **MongoDB connection fails**: App automatically falls back to in-memory storage. Check MONGO_URI in `.env`.
