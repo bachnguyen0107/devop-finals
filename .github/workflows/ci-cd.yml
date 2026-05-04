@@ -93,12 +93,15 @@ jobs:
             cd devop-finals
             git pull origin main || true
             
+            # Dọn dẹp docker để giải phóng dung lượng disk
+            docker system prune -af --volumes || true
+            
             # Tạo file .env từ template và trỏ về mongo container
             cp .env.example .env
             sed -i 's|MONGO_URI=mongodb://localhost:27017/products_db|MONGO_URI=mongodb://mongo:27017/products_db|g' .env
             
             # Dừng các container cũ
-            docker-compose down
+            docker-compose down || true
             
             # Kéo (Pull) hoặc build image mới và khởi động
             docker-compose pull || true
