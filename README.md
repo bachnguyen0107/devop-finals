@@ -1,10 +1,21 @@
-# Product API + UI (Express + MongoDB, Docker Deployment)
+# DevOps Final Project: Production-Grade CI/CD System
+## Product Management API + Web UI
 
-A full-stack Node.js + Express application with server-side rendered EJS UI for product management. Deployed using **Docker Compose** with MongoDB and Nginx reverse proxy.
+A **production-grade CI/CD system** demonstrating complete DevOps practices:
+- Full REST API for product management (CRUD operations)
+- Server-rendered web UI with Bootstrap
+- End-to-end automated CI/CD pipeline (GitHub Actions)
+- Infrastructure as Code (Terraform for AWS EC2)
+- Containerized multi-tier architecture (Docker Compose)
+- Monitoring & observability stack (Prometheus + Grafana)
+- HTTPS/SSL support with Nginx reverse proxy
+- Horizontal scaling with 3 web service replicas
+
+**Architecture:** Tier 2/3 containerized deployment on AWS EC2 (t2.micro optimized)
 
 ---
 
-## Features
+## Project Features
 
 - **Full REST API** for product management: CRUD operations (`GET / POST / PUT / PATCH / DELETE`)
 - **Server-rendered UI** with Bootstrap for intuitive product management at `/`
@@ -19,20 +30,33 @@ A full-stack Node.js + Express application with server-side rendered EJS UI for 
 ## Project Structure
 
 ```
-.
-├── main.js                    # Application entrypoint
-├── package.json               # Dependencies
-├── Dockerfile                 # Production container image
-├── docker-compose.yml         # Full stack orchestration
-├── .env.example              # Environment template
-├── controllers/              # Request/response logic
-├── models/                   # Mongoose schema definitions
-├── routes/                   # API & UI route definitions
-├── services/                 # Data source abstraction layer
-├── validators/               # Input validation
-├── views/                    # EJS templates
-├── public/                   # Static assets (CSS, JS, images)
-└── evidence/                 # Deployment screenshots & logs
+devop-finals/
+├── .github/workflows/
+│   └── ci-cd.yml                    # GitHub Actions CI/CD pipeline (lint → security → build → deploy)
+├── terraform/
+│   └── main.tf                      # IaC: AWS EC2, security groups, auto-provisioning
+├── prometheus/
+│   ├── prometheus.yml               # Prometheus configuration (metrics collection)
+│   └── grafana-datasources.yml      # Grafana datasources (Prometheus integration)
+├── nginx.conf                       # Nginx reverse proxy & load balancer config
+├── nginx-ssl.conf                   # Nginx SSL/TLS configuration
+├── Dockerfile                       # Docker image for Node.js app
+├── docker-compose.yml               # Full stack: nginx, web (3x), mongo, prometheus, grafana, cadvisor
+├── docker-compose.prod.yml          # Production lean config: nginx, web (3x), mongo (EC2 optimized)
+├── docker-compose.monitoring.yml    # Monitoring only: prometheus, grafana, cadvisor
+├── main.js                          # Application entrypoint
+├── package.json                     # Dependencies & npm scripts
+├── .env.example                     # Environment template
+├── README.md                        # This file
+├── TESTING_CHECKLIST.md             # Comprehensive testing guide before demo
+├── controllers/                     # Express request handlers
+├── models/                          # MongoDB/Mongoose schemas
+├── routes/                          # API & UI route definitions
+├── services/                        # Data source abstraction (MongoDB + in-memory)
+├── validators/                      # Input validation logic
+├── views/                           # EJS templatesför web UI
+├── public/                          # Static assets (CSS, JS, images)
+└── evidence/                        # Screenshots & deployment logs
 ```
 
 ---
@@ -80,25 +104,30 @@ PORT=3000
 MONGO_URI=mongodb://mongo:27017/products_db
 ```
 
-For production with Docker Hub image, update the image name in `docker-compose.yml`:
-```yaml
-image: YOUR_DOCKERHUB_USERNAME/devop-midterm-web:1.0.0
+### 3. Start Application
+
+**Production Deployment (EC2 - lean config, no monitoring):**
+```bash
+docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
-### 3. Build & Deploy
-
+**Full Stack (Local dev/demo with monitoring):**
 ```bash
-# Build and start containers
-docker compose up --build
+docker-compose up -d --build
+```
 
-# Or pull pre-built image and run
-docker compose up
+**Just Monitoring Stack (connects to running services):**
+```bash
+docker-compose -f docker-compose.monitoring.yml up -d
 ```
 
 ### 4. Access the Application
 
 - **Web UI**: http://localhost:3000
-- **API**: http://localhost:3000/products (JSON responses)
+- **API**: http://localhost:3000/products
+- **Grafana Dashboard** (if monitoring running): http://localhost:3001 (admin/admin)
+- **Prometheus**: http://localhost:9090
+- **cAdvisor**: http://localhost:8080
 
 ---
 
@@ -210,43 +239,209 @@ The stack includes:
 
 ---
 
-## Deployment Strategy
+## CI/CD Pipeline (GitHub Actions)
 
-### Production Deployment (EC2 - Optimized for t2.micro)
-Uses **lean config** to fit disk constraints:
+### Pipeline Stages
+
+Automatic triggers on `git push` to `main` or `master`:
+
+1. **Code Quality & Linting** (`build-and-test`)
+   - Install dependencies with `npm install`
+   - Run ESLint with `npm run lint -- --quiet`
+   - ✅ Pass: Continue to next stage
+
+2. **Security Scanning** (`security-scan`) 
+   - Trivy filesystem scan for vulnerabilities
+   - Checks CRITICAL & HIGH severity issues
+   - ✅ Pass: Proceed to image build
+
+3. **Docker Build & Push** (`docker-build-push`)
+   - Build Docker image from Dockerfile
+   - Tag: `DOCKER_USERNAME/devop-final-web:latest` and `:SHA`
+   - Push to Docker Hub registry
+   - ✅ Success: Ready for deployment
+
+4. **Continuous Delivery** (`deploy`)
+   - SSH into EC2 instance
+   - Git pull latest code
+   - Aggressive docker cleanup (free disk space)
+   - Deploy using `docker-compose.prod.yml` (lean config)
+   - Services auto-restart on failure
+
+### GitHub Secrets Required
+```
+DOCKER_USERNAME       # Docker Hub username
+DOCKER_PASSWORD       # Docker Hub access token
+EC2_HOST             # EC2 public IP or domain
+EC2_USERNAME         # EC2 user (ec2-user or ubuntu)
+EC2_SSH_KEY          # EC2 private SSH key (PEM format)
+```
+
+### Workflow Configuration
+See `.github/workflows/ci-cd.yml` for complete pipeline definition.
+
+---
+
+## Infrastructure as Code (Terraform)
+
+### AWS EC2 Provisioning
+
+File: `terraform/main.tf`
+
+**Features:**
+- Automated EC2 instance creation (Ubuntu 22.04 LTS, t2.micro)
+- Security group with ingress rules (HTTP 80, HTTPS 443, SSH 22)
+- Auto-install Docker and Docker Compose on launch
+- Parameterized for flexibility (region, key_name)
+
+**Deployment:**
+```bash
+terraform init
+terraform plan -var="key_name=your-aws-keypair" -var="aws_region=ap-southeast-1"
+terraform apply
+```
+
+**Outputs:**
+- EC2 instance public IP
+- Security group ID
+- Instance details for SSH access
+
+---
+
+## Monitoring & Observability
+
+### Stack Components
+
+**Prometheus** (port 9090)
+- Metrics collection from cAdvisor
+- Stores time-series data with 15-day retention
+- Configuration: `prometheus/prometheus.yml`
+
+**Grafana** (port 3001)
+- Admin: admin/admin
+- Pre-configured Prometheus datasource
+- Container metrics dashboards
+- Accessible: http://localhost:3001
+
+**cAdvisor** (port 8080)
+- Container metrics exporter
+- Real-time CPU, memory, disk I/O monitoring
+- Accessible: http://localhost:8080
+
+### Demo Strategy
+```bash
+# 1. Production app running on EC2 (via docker-compose.prod.yml)
+# 2. Start monitoring stack locally for demo
+docker-compose -f docker-compose.monitoring.yml up -d
+
+# 3. Open Grafana and show live metrics
+# 4. Simulate failure: docker kill <container>
+# 5. Show container recovery in Grafana
+```
+
+---
+
+---
+
+## HTTPS & SSL Configuration
+
+### Certificate Generation
+
+Script: `generate-cert-ec2.sh`
+
+Generates self-signed certificates for local/development:
+```bash
+./generate-cert-ec2.sh
+# Creates: ./ssl/cert.pem, ./ssl/key.pem
+```
+
+For production, use AWS ACM or Let's Encrypt certificates.
+
+### Nginx Configuration
+
+- **HTTP (port 80)**: Redirects to HTTPS
+- **HTTPS (port 443)**: Serves with cert.pem and key.pem
+- **Reverse Proxy**: Forwards to web service (port 3000)
+- **Load Balancing**: Distributes across 3 web replicas
+
+Main config: `nginx.conf`
+SSL config: `nginx-ssl.conf`
+
+### Verification
+```bash
+curl -I https://your-domain.com/
+# Expected: HTTP/1.1 200 OK
+```
+
+---
+
+## Deployment Models & Strategies
+
+### Production Deployment on EC2 (Lean Config - Tier 2)
 ```bash
 docker-compose -f docker-compose.prod.yml up -d --build
 ```
-Services: nginx, web (3 replicas), mongo
-- Fits in 2.1GB available disk space
-- Essential services only for core functionality
-- Deployed via GitHub Actions on git push to main
+**Services:** nginx, web (3 replicas), mongo  
+**Disk Usage:** ~1.5GB (optimized for t2.micro)  
+**Deployment:** Automated via GitHub Actions on push to main  
+**Auto-Recovery:** Container restart on failure  
+**Data Persistence:** MongoDB volumes + application uploads
 
-### Full Stack Deployment (Development/Demo)
-Uses **full config** with monitoring stack:
+### Full Stack Deployment (Local Development/Demo - Tier 2/3)
 ```bash
 docker-compose up -d --build
 ```
-Services: nginx, web (3 replicas), mongo, prometheus, grafana, cadvisor
-- Requires ~4GB disk space
-- Complete monitoring and observability
-- Used for local testing and live demonstrations
+**Services:** nginx, web (3 replicas), mongo, prometheus, grafana, cadvisor  
+**Disk Usage:** ~4GB  
+**Use Case:** Local testing, live demonstrations, full observability  
+**Features:** Complete monitoring, failure simulation, metrics visualization
 
-### Monitoring Stack (Optional - Can be added separately)
+### Monitoring Stack (Optional - Add to Any Deployment)
 ```bash
 docker-compose -f docker-compose.monitoring.yml up -d
 ```
-Services: prometheus, grafana, cadvisor
-- Connects to existing app-network
-- Grafana admin: admin/admin (port 3001)
-- Prometheus: port 9090
-- cAdvisor: port 8080
+**Services:** prometheus (9090), grafana (3001), cadvisor (8080)  
+**Connection:** Joins existing app-network  
+**Demo Use:** Show metrics without impacting production deployment
 
-**Demo Strategy:**
-1. Show production deployment on EC2 (via SSH or browser)
-2. For monitoring demonstration: Start monitoring stack locally or on secondary host
-3. Show end-to-end CI/CD: code change → GitHub Actions → production update
-4. Demonstrate failure recovery and monitoring insights
+### Recommended Demo Setup
+```bash
+# Terminal 1: Production running on EC2
+ssh ec2-user@your-ec2-ip "docker ps"
+
+# Terminal 2: Monitoring stack locally (for demo)
+docker-compose -f docker-compose.monitoring.yml up -d
+# Then open Grafana: http://localhost:3001
+
+# Terminal 3: GitHub Actions tab
+# Watch live deployment via SSH
+```
+
+---
+
+## Testing & Validation
+
+### Before Demonstrating to Instructor
+
+**See: [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md) for comprehensive testing guide**
+
+Quick verification:
+```bash
+# 1. SSH to EC2 and verify services
+docker ps | grep -E "nginx|web|mongo"
+# Expected: 5 containers running
+
+# 2. Test application
+curl http://EC2_IP/products | jq '.data | length'
+# Expected: JSON array with products
+
+# 3. Check CI/CD success
+# GitHub Actions → Latest run should be ✅ all green
+
+# 4. Test monitoring (if running)
+curl http://localhost:9090/api/v1/query?query=up
+# Expected: JSON with prometheus targets
+```
 
 ---
 
@@ -260,17 +455,40 @@ Services: prometheus, grafana, cadvisor
 
 **Containers not starting**: Run `docker compose logs` to see detailed error messages.
 
+**EC2 deployment fails "no space left on device"**: 
+- Run `docker system prune -af --volumes`
+- Use `docker-compose.prod.yml` (lean config) instead of full stack
+- Check available disk: `df -h`
+
 ---
 
 ## Technologies
 
+**Application Stack:**
 - **Runtime**: Node.js 18 (Alpine Linux)
 - **Framework**: Express.js 4.18
 - **Database**: MongoDB 6.0 (via Docker)
 - **Template Engine**: EJS 3.1
 - **ORM**: Mongoose 7.0
 - **Form Handling**: multer (file uploads), express-validator
+
+**DevOps & Infrastructure:**
 - **Containerization**: Docker & Docker Compose
+- **Web Server**: Nginx (reverse proxy, load balancer, SSL/TLS)
+- **CI/CD**: GitHub Actions (automated lint, security, build, deploy)
+- **Infrastructure as Code**: Terraform (AWS EC2 provisioning)
+- **Monitoring**: Prometheus (metrics), Grafana (dashboards), cAdvisor (container metrics)
+- **Cloud Platform**: AWS EC2 (t2.micro, Ubuntu 22.04 LTS)
+- **Source Control**: Git & GitHub
+
+---
+
+## Team & Submission
+
+**Course**: DevOps Final Exam - Production-Grade CI/CD System  
+**Submission Format**: GitHub repository + live demo + technical report
+
+For testing and validation steps, refer to [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md)
 
 ---
 
