@@ -106,7 +106,7 @@ jobs:
             # Dừng các container cũ
             docker-compose down || true
             
-            # Kéo (Pull) hoặc build image mới và khởi động
-            docker-compose pull || true
-            docker-compose up -d --build
+            # Khởi động services (pull images từ Docker Hub, không build local)
+            docker-compose pull
+            docker-compose up -d
 
