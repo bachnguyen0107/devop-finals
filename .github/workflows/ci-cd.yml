@@ -93,20 +93,18 @@ jobs:
             cd devop-finals
             git pull origin main || true
             
-            # Dọn dẹp docker sạch sẽ để giải phóng dung lượng disk tối đa
+            # Dọn dẹp docker sạch sẽ để giải phóng dung lượng disk tối đa trước build
+            docker-compose down -v 2>/dev/null || true
             docker system prune -af --volumes || true
             docker rmi $(docker images -q) 2>/dev/null || true
             docker volume prune -f || true
+            docker network prune -f || true
             df -h
             
             # Tạo file .env từ template và trỏ về mongo container
             cp .env.example .env
             sed -i 's|MONGO_URI=mongodb://localhost:27017/products_db|MONGO_URI=mongodb://mongo:27017/products_db|g' .env
             
-            # Dừng các container cũ
-            docker-compose down || true
-            
-            # Khởi động services (pull images từ Docker Hub, không build local)
-            docker-compose pull
-            docker-compose up -d
+            # Build images locally từ Dockerfile và khởi động
+            docker-compose up -d --build
 

@@ -15,7 +15,8 @@ services:
       - app-network
 
   web:
-    image: bachnguyen0107/devop-final-web:latest
+    build: .
+    image: devop-final-web:latest
     env_file:
       - .env
     expose:
