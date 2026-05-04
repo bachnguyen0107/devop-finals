@@ -86,12 +86,21 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Nếu chưa có thư mục, clone repo về
+            if [ ! -d "devop-finals" ]; then
+              git clone https://github.com/${{ github.repository }}.git devop-finals
+            fi
             cd devop-finals
-            git pull origin main
+            git pull origin main || true
+            
+            # Tạo file .env từ template và trỏ về mongo container
+            cp .env.example .env
+            sed -i 's|MONGO_URI=mongodb://localhost:27017/products_db|MONGO_URI=mongodb://mongo:27017/products_db|g' .env
+            
             # Dừng các container cũ
             docker-compose down
-            # Xóa các image cũ (tùy chọn)
-            # docker image prune -f
-            # Khởi động lại với các image mới nhất
-            docker-compose up -d
+            
+            # Kéo (Pull) hoặc build image mới và khởi động
+            docker-compose pull || true
+            docker-compose up -d --build
 

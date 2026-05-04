@@ -1,7 +1,7 @@
 services:
   nginx:
     image: nginx:latest
-    container_name: devop_midterm_nginx
+    container_name: devop_final_nginx
     ports:
       - "80:80"
       - "443:443"
@@ -15,7 +15,8 @@ services:
       - app-network
 
   web:
-    image: devop-midterm-web:1.0.0
+    build: .
+    image: devop-final-web:latest
     env_file:
       - .env
     expose:
@@ -33,7 +34,7 @@ services:
 
   mongo:
     image: mongo:6.0
-    container_name: devop_midterm_mongo
+    container_name: devop_final_mongo
     volumes:
       - mongo_data:/data/db
     restart: unless-stopped
@@ -42,7 +43,7 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: devop_midterm_prometheus
+    container_name: devop_final_prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
@@ -57,7 +58,7 @@ services:
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
-    container_name: devop_midterm_cadvisor
+    container_name: devop_final_cadvisor
     privileged: true
     devices:
       - /dev/kmsg:/dev/kmsg
@@ -75,7 +76,7 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    container_name: devop_midterm_grafana
+    container_name: devop_final_grafana
     ports:
       - "3001:3000"
     volumes:
