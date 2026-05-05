@@ -13,7 +13,7 @@ docker ps
 # Should show: nginx, web (3 replicas), mongo
 
 # Check services status
-docker-compose -f docker-compose.prod.yml ps
+docker-compose -f docker-compose.yml ps
 
 # Check disk space (should have 1-1.5GB free)
 df -h
@@ -83,7 +83,7 @@ On your local machine or demo server:
 ### 3.1 Start monitoring services
 ```bash
 cd devop-finals
-docker-compose -f docker-compose.monitoring.yml up -d
+docker-compose -f docker-compose.yml up -d --build
 ```
 
 ### 3.2 Verify monitoring services
@@ -121,7 +121,7 @@ curl http://localhost:9090/api/v1/query?query=up
 ### 4.1 Local full stack (for testing)
 ```bash
 # Start all services locally
-docker-compose up -d --build
+docker-compose -f docker-compose.yml up -d --build
 
 # Check all 8 services running
 docker ps | wc -l
@@ -213,17 +213,17 @@ curl http://localhost:3000/products | grep "Persistent Product"
 ### 6.1 Test HTTPS certificate
 ```bash
 # From any machine, test HTTPS
-curl -I https://your-domain.com/
+curl -I https://devop-midterm2026.online/
 # Should return HTTP 200 (not 403/404/SSL error)
 
 # Check certificate validity
-openssl s_client -connect your-domain.com:443 -showcerts
+openssl s_client -connect devop-midterm2026.online:443 -showcerts
 # Verify: Issuer, Subject CN, Validity dates
 ```
 
 ### 6.2 Test HTTP → HTTPS redirect (if configured)
 ```bash
-curl -I http://your-domain.com/
+curl -I http://devop-midterm2026.online/
 # Should redirect to https://
 ```
 
@@ -236,7 +236,7 @@ curl -I http://your-domain.com/
 **EC2 Production:**
 - [ ] SSH into EC2 successful
 - [ ] `docker ps` shows 4 containers (nginx, 3x web, mongo)
-- [ ] `curl http://EC2_IP/` returns 200
+- [ ] `curl http://13.212.58.182/` returns 200
 - [ ] Products accessible via browser
 - [ ] HTTPS working (if configured)
 
@@ -300,7 +300,7 @@ curl http://localhost:3000/products | jq '.data | length'
 1. **Show EC2 Production** (2 mins)
    ```
    SSH to EC2 → docker ps → show 4 running services
-   Browser: http://EC2_IP → show app working
+  Browser: http://13.212.58.182 → show app working
    ```
 
 2. **Show CI/CD Pipeline** (3 mins)

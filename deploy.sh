@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # EC2 Configuration
-EC2_IP="54.234.158.141"
+EC2_IP="13.212.58.182"
 EC2_USER="ubuntu"
 SSH_KEY="/home/dmin/.ssh/id_rsa"
 PROJECT_PATH="/home/dmin/devopp_final/devop-finals"
@@ -56,6 +56,6 @@ ssh -i "$SSH_KEY" "$EC2_USER@$EC2_IP" "ls -la $REMOTE_PATH | head -20"
 
 echo -e "${GREEN}Deployment preparation complete!${NC}"
 echo -e "${YELLOW}Next steps:${NC}"
-echo "1. SSH into your instance: ssh -i ~/.ssh/id_rsa ubuntu@54.234.158.141"
+echo "1. SSH into your instance: ssh -i ~/.ssh/id_rsa ubuntu@13.212.58.182"
 echo "2. Navigate to project: cd ~/devop-finals"
 echo "3. Start services: docker-compose up -d"

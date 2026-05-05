@@ -13,6 +13,9 @@ ssl
 letsencrypt
 certbot
 evidence
+terraform/
+*.tfstate
+*.tfstate.*
 .DS_Store
 __pycache__
 .pytest_cache

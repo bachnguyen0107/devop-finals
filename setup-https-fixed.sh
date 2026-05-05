@@ -42,9 +42,10 @@ server {
         try_files $uri =404;
     }
 
-    # Temporary redirect - will be replaced after cert generation
+    # Temporary response - will be replaced after cert generation
     location / {
-        return 302 http://devop-midterm2026.online:3000$request_uri;
+      return 200 'Certificate generation in progress...';
+      add_header Content-Type text/plain;
     }
 }
 EOF
@@ -66,6 +67,7 @@ sudo certbot certonly --webroot \
   -w $(pwd)/ssl/certbot \
   --non-interactive \
   --agree-tos \
+  --expand \
   --email "$EMAIL" \
   -d "$DOMAIN" \
   -d "www.$DOMAIN"
@@ -94,11 +96,11 @@ sudo chown -R $(id -u):$(id -g) ./ssl/
 
 # Step 8: Start services with HTTPS
 echo -e "${YELLOW}Step 8: Starting services with HTTPS...${NC}"
-docker-compose -f docker-compose-ssl.yml up -d
+docker-compose -f docker-compose.yml up -d
 
 # Step 9: Set up auto-renewal
 echo -e "${YELLOW}Step 9: Setting up auto-renewal...${NC}"
-sudo crontab -l | { cat; echo "0 12 * * * /usr/bin/certbot renew --quiet && docker-compose -f $(pwd)/docker-compose-ssl.yml restart nginx"; } | sudo crontab -
+sudo crontab -l | { cat; echo "0 12 * * * /usr/bin/certbot renew --quiet && docker-compose -f $(pwd)/docker-compose.yml restart nginx"; } | sudo crontab -
 
 echo -e "${GREEN}✓ HTTPS setup complete!${NC}"
 echo -e "${GREEN}Your site should now be available at: https://$DOMAIN${NC}"
@@ -106,4 +108,4 @@ echo ""
 echo -e "${YELLOW}Next steps:${NC}"
 echo "1. Test HTTPS: curl -I https://$DOMAIN"
 echo "2. Check renewal: sudo certbot certificates"
-echo "3. Monitor logs: docker-compose -f docker-compose-ssl.yml logs -f nginx"
+echo "3. Monitor logs: docker-compose -f docker-compose.yml logs -f nginx"

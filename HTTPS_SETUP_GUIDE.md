@@ -84,7 +84,7 @@ sudo chown -R $USER:$USER ./ssl/
 
 ### Step 8: Start HTTPS Services
 ```bash
-docker-compose -f docker-compose-ssl.yml up -d
+docker-compose -f docker-compose.yml up -d
 ```
 
 ### Step 9: Set Up Auto-Renewal
@@ -92,7 +92,7 @@ docker-compose -f docker-compose-ssl.yml up -d
 # Add to crontab (runs daily at noon)
 sudo crontab -e
 # Add this line:
-0 12 * * * /usr/bin/certbot renew --quiet && docker-compose -f /path/to/project/docker-compose-ssl.yml restart nginx
+0 12 * * * /usr/bin/certbot renew --quiet && docker-compose -f /path/to/project/docker-compose.yml restart nginx
 ```
 
 ## 🔧 Troubleshooting
@@ -121,7 +121,7 @@ ls -la ssl/letsencrypt/live/your-domain.com/
 docker exec nginx nginx -t
 
 # Check nginx logs
-docker-compose -f docker-compose-ssl.yml logs nginx
+docker-compose -f docker-compose.yml logs nginx
 ```
 
 ### Certificate Already Exists

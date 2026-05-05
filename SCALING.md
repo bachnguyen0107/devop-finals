@@ -82,7 +82,7 @@ docker-compose logs devop-finals-web-3
 ### Test Load Balancing
 ```bash
 # Generate multiple requests and watch distribution
-for i in {1..50}; do curl http://54.234.158.141/; done
+for i in {1..50}; do curl http://13.212.58.182/; done
 
 # Watch Nginx logs
 docker-compose logs -f nginx | grep "upstream"
