@@ -3,6 +3,12 @@ provider "aws" {
   region = "ap-southeast-1" # Đổi lại theo region của bạn, ví dụ: us-east-1
 }
 
+# Variable cho public key
+variable "public_key" {
+  description = "SSH public key for EC2 access"
+  type        = string
+}
+
 # Tạo Security Group mở các port cần thiết cho dự án
 resource "aws_security_group" "devops_sg" {
   name        = "devops_final_sg"
@@ -57,12 +63,17 @@ resource "aws_security_group" "devops_sg" {
   }
 }
 
+# Tạo AWS Key Pair từ public key
+resource "aws_key_pair" "devops_key" {
+  key_name   = "devops-final-key"
+  public_key = var.public_key
+}
+
 # Tạo máy chủ EC2 Ubuntu
 resource "aws_instance" "devops_server" {
   ami           = "ami-0fa377108253bf620" # Ubuntu 22.04 LTS ở ap-southeast-1 (Singapore)
   instance_type = "t2.micro"              # Free tier
-  key_name      = "your-key-pair-name"    # Đổi thành tên Key Pair trên AWS của bạn
-
+  key_name      = aws_key_pair.devops_key.key_name
   security_groups = [aws_security_group.devops_sg.name]
 
   # User Data script cài đặt tự động Docker & Docker Compose
