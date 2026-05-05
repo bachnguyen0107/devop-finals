@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const existingImage = row.dataset.image || '';
   document.getElementById('img-preview').src =
-    existingImage && existingImage.length ? existingImage : '/images/placeholder-80.png';
+    existingImage && existingImage.length ? existingImage : '/images/placeholder80.png';
   document.getElementById('imageUrl').value = existingImage || '';
   modal.show();
 }
