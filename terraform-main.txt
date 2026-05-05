@@ -1,19 +1,6 @@
-# Cấu hình Provider
+# Cß║Ñu h├¼nh Provider
 provider "aws" {
-  region = "ap-southeast-1" # Đổi lại theo region của bạn, ví dụ: us-east-1
-}
-
-# Optional AMI and instance type variables so it's easier to adjust
-variable "ami" {
-  description = "AMI to use for the EC2 instance"
-  type        = string
-  default     = "ami-0fa377108253bf620" # Ubuntu 22.04 LTS ap-southeast-1
-}
-
-variable "instance_type" {
-  description = "EC2 instance type"
-  type        = string
-  default     = "t3.small"
+  region = "ap-southeast-1" # ─Éß╗òi lß║íi theo region cß╗ºa bß║ín, v├¡ dß╗Ñ: us-east-1
 }
 
 # Variable cho public key
@@ -22,7 +9,7 @@ variable "public_key" {
   type        = string
 }
 
-# Tạo Security Group mở các port cần thiết cho dự án
+# Tß║ío Security Group mß╗ƒ c├íc port cß║ºn thiß║┐t cho dß╗▒ ├ín
 resource "aws_security_group" "devops_sg" {
   name        = "devops_final_sg"
   description = "Security group for DevOps Final Project"
@@ -67,14 +54,6 @@ resource "aws_security_group" "devops_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # cAdvisor
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   # Outbound traffic (Allow all)
   egress {
     from_port   = 0
@@ -84,20 +63,20 @@ resource "aws_security_group" "devops_sg" {
   }
 }
 
-# Tạo AWS Key Pair từ public key
+# Tß║ío AWS Key Pair tß╗½ public key
 resource "aws_key_pair" "devops_key" {
   key_name   = "devops-final-key"
   public_key = var.public_key
 }
 
-# Tạo máy chủ EC2 Ubuntu
+# Tß║ío m├íy chß╗º EC2 Ubuntu
 resource "aws_instance" "devops_server" {
-  ami           = var.ami
-  instance_type = var.instance_type
+  ami           = "ami-0fa377108253bf620" # Ubuntu 22.04 LTS ß╗ƒ ap-southeast-1 (Singapore)
+  instance_type = "t2.micro"              # Free tier
   key_name      = aws_key_pair.devops_key.key_name
   security_groups = [aws_security_group.devops_sg.name]
 
-  # User Data script cài đặt tự động Docker & Docker Compose
+  # User Data script c├ái ─æß║╖t tß╗▒ ─æß╗Öng Docker & Docker Compose
   user_data = <<-EOF
               #!/bin/bash
               sudo apt-get update
