@@ -59,3 +59,7 @@ ssl/
 letsencrypt/
 certbot/
 .env
+.terraform/
+*.lock.hcl
+docker-ps.txt
+node_modules/
