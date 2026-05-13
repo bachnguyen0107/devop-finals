@@ -66,7 +66,8 @@ services:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
+      # Sửa lỗi: Bỏ dấu gạch chéo cuối cùng để tránh lỗi mkdir trên hệ thống Read-only
+      - /var/lib/docker:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     ports:
       - "8080:8080"
