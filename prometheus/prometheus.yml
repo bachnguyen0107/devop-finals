@@ -12,4 +12,4 @@ scrape_configs:
     # or a metrics endpoint in the app, let's add cadvisor to docker-compose.
     # We will configure it to point to cadvisor to monitor containers.
     static_configs:
-      - targets: ['cadvisor:8080']
+      - targets: ['devop_final_cadvisor:8080']
