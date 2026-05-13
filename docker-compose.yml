@@ -60,15 +60,16 @@ services:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
     container_name: devop_final_cadvisor
     privileged: true
+    security_opt:
+      - no-new-privileges:false
     devices:
       - /dev/kmsg
     volumes:
       - /:/rootfs:ro
-      - /var/run:/var/run:rw
+      - /var/run:/var/run:ro
       - /sys:/sys:ro
-      # Sửa lỗi: Bỏ dấu gạch chéo cuối cùng để tránh lỗi mkdir trên hệ thống Read-only
-      - /var/lib/docker:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /cgroup:/cgroup:ro
     ports:
       - "8080:8080"
     restart: unless-stopped
