@@ -236,7 +236,7 @@ curl -I http://devop-midterm2026.online/
 **EC2 Production:**
 - [ ] SSH into EC2 successful
 - [ ] `docker ps` shows 4 containers (nginx, 3x web, mongo)
-- [ ] `curl http://13.212.58.182/` returns 200
+- [ ] `curl http://13.229.76.119/` returns 200
 - [ ] Products accessible via browser
 - [ ] HTTPS working (if configured)
 
@@ -300,7 +300,7 @@ curl http://localhost:3000/products | jq '.data | length'
 1. **Show EC2 Production** (2 mins)
    ```
    SSH to EC2 → docker ps → show 4 running services
-  Browser: http://13.212.58.182 → show app working
+  Browser: http://13.229.76.119 → show app working
    ```
 
 2. **Show CI/CD Pipeline** (3 mins)

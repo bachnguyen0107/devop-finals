@@ -1,7 +1,7 @@
 # EC2 Deployment Guide
 
 ## Overview
-Your project has been successfully uploaded to EC2 instance at **13.212.58.182**
+Your project has been successfully uploaded to EC2 instance at **13.229.76.119**
 
 ## Current Setup
 ✅ Project files uploaded to `~/devop-finals/`
@@ -16,7 +16,7 @@ Before starting services, you need to build your web application Docker image:
 
 ```bash
 # SSH into EC2
-ssh -i ~/.ssh/id_rsa ubuntu@13.212.58.182
+ssh -i ~/.ssh/id_rsa ubuntu@13.229.76.119
 
 # Navigate to project
 cd ~/devop-finals
@@ -39,7 +39,7 @@ services:
 
 ### 1. SSH into your instance
 ```bash
-ssh -i ~/.ssh/id_rsa ubuntu@13.212.58.182
+ssh -i ~/.ssh/id_rsa ubuntu@13.229.76.119
 ```
 
 ### 2. Navigate to project
@@ -85,7 +85,7 @@ curl http://localhost/health # Health check endpoint
 ```
 
 Or access from your browser:
-- **Public IP**: http://13.212.58.182
+- **Public IP**: http://13.229.76.119
 
 ## Service Information
 

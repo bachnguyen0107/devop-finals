@@ -236,7 +236,7 @@ terraform apply
 - Admin: admin/admin
 - Pre-configured Prometheus datasource
 - Container metrics dashboards
-- Accessible: http://13.212.58.182:3001
+- Accessible: http://13.229.76.119:3001
 
 **cAdvisor** (port 8080)
 - Container metrics exporter
@@ -303,7 +303,7 @@ ssh ec2-user@your-ec2-ip "docker ps"
 
 # Terminal 2: Monitoring stack locally (for demo)
 docker-compose -f docker-compose.yml up -d --build
-# Then open Grafana: http://13.212.58.182:3001
+# Then open Grafana: http://13.229.76.119:3001
 # Terminal 3: GitHub Actions tab
 # Watch live deployment via SSH
 ```
@@ -323,7 +323,7 @@ docker ps | grep -E "nginx|web|mongo"
 # Expected: 8 containers running
 
 # 2. Test application
-curl http://13.212.58.182/products | jq '.data | length'
+curl http://13.229.76.119/products | jq '.data | length'
 # Expected: JSON array with products
 
 # 3. Check CI/CD success

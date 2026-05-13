@@ -8,7 +8,7 @@ This guide explains how to set up HTTPS with Let's Encrypt SSL certificates for 
 
 1. **Domain registered and DNS configured**
    - Domain: `devop-midterm2026.online`
-   - DNS A record should point to your EC2 instance IP: `13.212.58.182`
+   - DNS A record should point to your EC2 instance IP: `13.229.76.119`
 
 2. **EC2 instance with Docker and Docker Compose**
    - Already installed on your instance
@@ -26,7 +26,7 @@ Make sure your domain DNS records point to your EC2 instance:
 A Record:
   Domain: devop-midterm2026.online
   Type: A
-   Value: 13.212.58.182
+   Value: 13.229.76.119
   TTL: 3600
 
 CNAME Record (optional):
@@ -47,16 +47,16 @@ dig devop-midterm2026.online
 From your local machine, upload the new HTTPS configuration files:
 
 ```bash
-scp -i ~/.ssh/id_rsa /home/dmin/devopp_final/devop-finals/nginx-ssl.conf ubuntu@13.212.58.182:~/devop-finals/
-scp -i ~/.ssh/id_rsa /home/dmin/devopp_final/devop-finals/docker-compose.yml ubuntu@13.212.58.182:~/devop-finals/
-scp -i ~/.ssh/id_rsa /home/dmin/devopp_final/devop-finals/setup-https.sh ubuntu@13.212.58.182:~/devop-finals/
+scp -i ~/.ssh/id_rsa /home/dmin/devopp_final/devop-finals/nginx-ssl.conf ubuntu@13.229.76.119:~/devop-finals/
+scp -i ~/.ssh/id_rsa /home/dmin/devopp_final/devop-finals/docker-compose.yml ubuntu@13.229.76.119:~/devop-finals/
+scp -i ~/.ssh/id_rsa /home/dmin/devopp_final/devop-finals/setup-https.sh ubuntu@13.229.76.119:~/devop-finals/
 ```
 
 ### Step 3: Run Setup Script on EC2
 
 ```bash
 # SSH into EC2
-ssh -i ~/.ssh/id_rsa ubuntu@13.212.58.182
+ssh -i ~/.ssh/id_rsa ubuntu@13.229.76.119
 
 # Navigate to project
 cd ~/devop-finals
@@ -245,7 +245,7 @@ docker-compose exec certbot certbot renew --force-renewal
 Your domain should have these DNS records:
 
 ```
-devop-midterm2026.online     A       13.212.58.182      3600
+devop-midterm2026.online     A       13.229.76.119      3600
 www.devop-midterm2026.online CNAME   devop-midterm2026.online    3600
 ```
 
